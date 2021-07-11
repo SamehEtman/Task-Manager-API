@@ -16,6 +16,15 @@ router.post('/users' , async (req , res) =>{
     
 })
 
+router.post('/users/login' , async (req , res) =>{
+    try{
+        const user = await User.findByCredentials(req.body.email , req.body.password)
+        console.log(user)
+        res.send(user)
+    }catch (e){
+        res.status(400).send(e)
+    }
+})
 router.get('/users' ,async (req , res) =>{
     try{
         const user = await User.find({})
@@ -52,7 +61,13 @@ router.patch('/users/:id', async (req , res) =>{
         return res.status(400).send('This probrety is not available')
     
     try {
-        const user = await User.findByIdAndUpdate(_id , req.body , {useValidators : true , new :true})
+        const user = await User.findById(_id)
+
+        updates.forEach((key) =>{
+            user[key] = req.body[key]
+        })
+
+        await user.save()
         if (!user)
             return res.status(404).send('User not found')
         
