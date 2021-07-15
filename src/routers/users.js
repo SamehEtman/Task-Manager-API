@@ -5,6 +5,7 @@ const sharp = require ('sharp')
 const User = require('../models/users')
 const auth = require('../middleware/auth')
 const Task = require ('../models/tasks')
+const {sendWelcomeEmail , sendFarewellEmail} = require('../emails/accounts')
 const router = new express.Router()
 
 
@@ -13,6 +14,7 @@ const router = new express.Router()
 router.post('/users' ,async (req , res) =>{
     try {
         const user = new User(req.body)
+        sendWelcomeEmail(user.email , user.name)
         const token = await user.generateAuthToken();
         await user.save()
         res.status(201).send({user , token})
@@ -106,6 +108,7 @@ router.patch('/users/me', auth ,  async (req , res) =>{
 
 router.delete('/users/me' , auth , async (req , res) =>{
     try{
+        sendFarewellEmail (req.user.email , req.user.name)
         await req.user.remove();
         res.send(req.user)
     } catch (e){
